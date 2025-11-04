@@ -12,20 +12,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.subhamkumar.boxboxapp.ui.theme.BoxBoxAppTheme
+import android.app.Application
+import androidx.navigation.compose.rememberNavController
+import com.subhamkumar.boxboxapp.di.appModule
+import com.subhamkumar.boxboxapp.ui.home.AppNavGraph
+import com.subhamkumar.boxboxapp.ui.home.HomeScreen
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            BoxBoxAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+//            BoxBoxAppTheme {
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                    Greeting(
+//                        name = "Android",
+//                        modifier = Modifier.padding(innerPadding)
+//                    )
+//                }
+//            }
+            val navController = rememberNavController()
+            AppNavGraph(navController)
+            HomeScreen(navController)
         }
     }
 }

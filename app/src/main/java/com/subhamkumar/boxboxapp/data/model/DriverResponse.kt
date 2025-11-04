@@ -7,10 +7,18 @@ data class DriverResponse(
 )
 
 data class Driver(
+    @SerializedName("driverId") val driverId: String,
+    @SerializedName("firstName") val firstName: String,
+    @SerializedName("lastName") val lastName: String,
     @SerializedName("position") val position: Int,
-    @SerializedName("driverName") val driverName: String,
-    @SerializedName("team") val team: String,
-    @SerializedName("points") val points: String,
-    @SerializedName("nationality") val nationality: String,
-    @SerializedName("imageUrl") val imageUrl: String
-)
+    @SerializedName("teamName") val teamName: String,
+    @SerializedName("points") val points: Int,
+    @SerializedName("teamId") val teamId: String,
+    @SerializedName("racingNumber") val racingNumber: Int,
+    @SerializedName("driverCode") val driverCode: String,
+    @SerializedName("podiums") val podiums: Int,
+    @SerializedName("wins") val wins: Int,
+    @SerializedName("poles") val poles: Int,
+) {
+    val fullName: String get() = "$firstName $lastName"
+}

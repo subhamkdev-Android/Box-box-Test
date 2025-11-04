@@ -7,11 +7,9 @@ import retrofit2.http.GET
 
 interface ApiService {
 
-    // Fetch top driver
-    @GET("e8616da8-220c-4aab-a670-ab2d43224ecb")
-    suspend fun getDrivers(): Response<DriverResponse>
+    @GET("v1/e8616da8-220c-4aab-a670-ab2d43224ecb")
+    suspend fun getTopDriver(): DriverResponse
 
-    // Fetch race details
-    @GET("9086a3f1-f02b-4d24-8dd3-b63582f45e67")
-    suspend fun getRaceDetails(): Response<RaceResponse>
+    @GET("v1/9086a3f1-f02b-4d24-8dd3-b63582f45e67")
+    suspend fun getRaceDetails(): RaceResponse
 }
