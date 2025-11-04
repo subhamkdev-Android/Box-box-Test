@@ -2,7 +2,6 @@ package com.subhamkumar.boxboxapp.data.network
 
 import com.subhamkumar.boxboxapp.data.model.DriverResponse
 import com.subhamkumar.boxboxapp.data.model.RaceResponse
-import retrofit2.Response
 import retrofit2.http.GET
 
 interface ApiService {
