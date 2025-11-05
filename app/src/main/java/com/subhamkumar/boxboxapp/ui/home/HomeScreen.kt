@@ -7,10 +7,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import com.subhamkumar.boxboxapp.R
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.subhamkumar.boxboxapp.data.model.Driver
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -40,6 +42,17 @@ fun HomeScreen(navController: NavHostController) {
     val races by viewModel.races.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+
+    val pagerState = rememberPagerState(pageCount = { 2 })
+
+    // Auto-slide every 3 seconds
+    LaunchedEffect(pagerState) {
+        while (true) {
+            delay(3000)
+            val nextPage = (pagerState.currentPage + 1) % 2
+            pagerState.animateScrollToPage(nextPage)
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -60,17 +73,40 @@ fun HomeScreen(navController: NavHostController) {
                         .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // 🔹 Horizontal Pager for sliding cards
                     item {
-                        if (drivers.isNotEmpty()) {
-                            val topDriver = drivers.first()
-                            TopDriverCard(driver = topDriver, navController = navController)
-                        } else {
-                            Text(text = "No driver data available")
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                                .padding(0.dp,0.dp)
+
+
+                        ) { page ->
+                            when (page) {
+                                0 -> {
+                                    if (drivers.isNotEmpty()) {
+                                        val topDriver = drivers.first()
+                                        TopDriverCard(
+                                            driver = topDriver,
+                                            navController = navController
+                                        )
+                                    } else {
+                                        Text("No driver data available")
+                                    }
+                                }
+
+                                1 -> {
+                                    TwoImageSlideCard()
+                                }
+                            }
                         }
                     }
 
                     item { Spacer(modifier = Modifier.height(24.dp)) }
 
+                    // 🔹 Upcoming Race Section
                     item {
                         if (races.isNotEmpty()) {
                             val nextRace = races.first()
@@ -80,7 +116,7 @@ fun HomeScreen(navController: NavHostController) {
                                 textAlign = TextAlign.Center
                             )
                         } else {
-                            Text(text = "No race data available")
+                            Text("No race data available")
                         }
                     }
                 }
@@ -88,6 +124,7 @@ fun HomeScreen(navController: NavHostController) {
         }
     }
 }
+
 
 
 @Composable
@@ -255,5 +292,57 @@ fun ExpressiveLoader() {
         )
     }
 }
+
+@Composable
+fun TwoImageSlideCard() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(320.dp)
+            .clip(RoundedCornerShape(0.1.dp))
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.second_screen_img),
+                contentDescription = "Top Image",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(210.dp)
+                    .padding(top = 56.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 20.dp,
+                            topEnd = 20.dp
+                        )
+                    )
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.second_screen_img_bt),
+                contentDescription = "Bottom Image",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(bottom = 16.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            bottomStart = 20.dp,
+                            bottomEnd = 20.dp
+                        )
+                    )
+            )
+        }
+    }
+}
+
+
 
 

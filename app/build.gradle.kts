@@ -65,7 +65,7 @@ dependencies {
 // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-// Accompanist pager for the slider (optional)
+// Accompanist pager
     implementation("com.google.accompanist:accompanist-pager:0.36.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.36.0")
 
@@ -73,9 +73,6 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:4.1.1")
     implementation("io.insert-koin:koin-android:4.1.1")
     implementation("io.insert-koin:koin-android:3.6.0-wasm3")
-
-    implementation("androidx.compose.foundation:foundation:1.9.4")
-    //implementation("androidx.compose.foundation.pager:foundation-pager:1.6.2")
 
 
     implementation(libs.androidx.core.ktx)
