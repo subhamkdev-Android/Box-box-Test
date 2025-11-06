@@ -19,10 +19,8 @@ fun AppNavGraph(navController: NavHostController) {
             HomeScreen(navController)
         }
 
-        // race detail screen (new)
         composable("race_detail/{raceId}") { backStackEntry ->
             val raceId = backStackEntry.arguments?.getString("raceId")
-            // Pass the raceId and navController to the detail screen
             RaceDetailScreen(navController = navController, raceId = raceId)
         }
     }

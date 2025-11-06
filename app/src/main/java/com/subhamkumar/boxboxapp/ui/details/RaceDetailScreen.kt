@@ -4,11 +4,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +21,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.subhamkumar.boxboxapp.R
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import com.subhamkumar.boxboxapp.ui.theme.montserratFontFamily
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -31,33 +32,29 @@ fun RaceDetailScreen(
     navController: NavHostController,
     raceId: String?
 ) {
-    // ---------- Helpers & placeholder data ----------
+
     fun toMillis(epoch: Long): Long =
         if (epoch < 1_000_000_000_000L) epoch * 1000L else epoch
 
-    // exact placeholder paragraph you provided
     val circuitTitle = "São Paulo Circuit"
     val circuitParagraph =
         "Bahrain International circuit is located in Sakhir, Bahrain and it was designed by German architect Hermann Tilke. " +
                 "It was built on the site of a former camel farm, in Sakhir. It measures 5.412 km, has 15 corners and 3 DRS Zones. " +
                 "The Grand Prix have 57 laps. This circuit has 6 alternative layouts."
 
-    // facts as paragraphs (no bullets)
     val factParagraphs = listOf(
         "His brother Arthur Leclerc is currently set to race for DAMS in the 2023 F2 Championship",
         "He’s not related to Édouard Leclerc, the founder of a French supermarket chain"
     )
 
-    // header placeholder texts
     val roundText = "Round 12"
     val raceName = "São Paulo GP"
     val circuitIdText = "São Paulo"
     val dateRangeText = "23 - 30 April"
 
-    // sample start time for countdown (7 days from now)
+    // sample start (7 days from now)
     val sampleStartMillis = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
 
-    // countdown state updates every second
     var now by remember { mutableStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -71,7 +68,6 @@ fun RaceDetailScreen(
     val minutes = ((remaining / (60 * 1000)) % 60).toInt()
     fun two(v: Int) = if (v < 10) "0$v" else v.toString()
 
-    // ---------- UI ----------
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -79,159 +75,203 @@ fun RaceDetailScreen(
         contentPadding = PaddingValues(bottom = 56.dp)
     ) {
         item {
-            // Full-width header with three-stop gradient (dark -> mid -> black)
+            // Header box: background image fills entire box (no padding)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFF073E33), // dark green (start)
-                                Color(0xFF0F7A56), // mid green
-                                Color(0xFF041811)  // near-black at bottom
-                            ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY
-                        )
-                    )
-                    .padding(horizontal = 20.dp)
             ) {
-                // top title pushed slightly down
+                // full-bleed background image (no padding)
+                Image(
+                    painter = painterResource(id = R.drawable.bg_detail),
+                    contentDescription = "Background",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .matchParentSize()
+                )
+
+                // Optional subtle overlay to ensure text contrast (tweak alpha as needed)
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(Color.Black.copy(alpha = 0.18f))
+                )
+
                 Text(
                     text = "Upcoming race",
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .padding(top = 28.dp), // moved down a bit
+                        .padding(top = 40.dp, bottom = 50.dp),
+                    textAlign = TextAlign.Center,
                     color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontSize = 16.04.sp,
+                    lineHeight = 16.04.sp, // 100% of font size
+                    style = TextStyle(
+                        fontFamily = montserratFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.04.sp,
+                        lineHeight = 16.04.sp,
+                        letterSpacing = 0.sp
+                    )
                 )
 
-                // left column with round/race/circuit/date (reduced race name size)
+
+                // Left column for round, name, etc. (has its own padding)
                 Column(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(start = 4.dp, top = 72.dp)
+                        .padding(start = 20.dp, top = 102.dp)
                 ) {
-                    Text(text = roundText, color = Color.White.copy(alpha = 0.9f), fontSize = 14.sp)
+                    Text(text = roundText, color = Color.White.copy(alpha = 0.9f), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, fontFamily = montserratFontFamily)
                     Spacer(Modifier.height(6.dp))
-                    Text(text = raceName, color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Bold) // slightly smaller
+                    Text(text = raceName, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = montserratFontFamily)
                     Spacer(Modifier.height(6.dp))
-                    Text(text = circuitIdText, color = Color(0xFF7EDCB1), fontSize = 14.sp)
+                    Text(text = circuitIdText, color = Color(0xFF009B3A), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, fontFamily = montserratFontFamily)
                     Spacer(Modifier.height(6.dp))
-                    Text(text = dateRangeText, color = Color.White.copy(alpha = 0.9f), fontSize = 14.sp)
+                    Text(text = dateRangeText, color = Color.White.copy(alpha = 0.9f), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, fontFamily = montserratFontFamily)
                 }
 
-                // 3D circuit image moved slightly down and right
+                // 3D circuit image: sized 180 x 180 and positioned slightly down.
+                // Using absoluteOffset so it's placed relative to the header's top-left.
                 Image(
-                    painter = painterResource(id = R.drawable.td_circuit), // replace with actual id
+                    painter = painterResource(id = R.drawable.td_circuit),
                     contentDescription = "3d circuit",
                     modifier = Modifier
-                        .size(190.dp)
-                        .align(Alignment.TopEnd)
-                        .offset(x = (-12).dp, y = 28.dp), // pushed down
+                        .size(180.dp) // width & height ~ 180dp as requested
+                        .absoluteOffset(x = 195.dp, y = 116.dp),
                     contentScale = ContentScale.Fit
                 )
 
-                // FP1 Starts in - inline large numbers (no boxes)
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(start = 4.dp, bottom = 18.dp)
+                        .padding(start = 20.dp, bottom = 18.dp)
                 ) {
-                    Text(text = "FP1 Starts in", color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
+                    Text(text = "FP1 Starts in", color = Color.White, fontSize = 10.sp, fontFamily = montserratFontFamily, fontWeight = FontWeight.W400)
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Days
+
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(end = 20.dp)) {
-                            Text(text = two(days), color = Color(0xFF2FE09B), fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                            Text(text = "Days", color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
+                            Text(text = two(days), color = Color(0xFF009B3A), fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "Days", color = Color.White.copy(alpha = 0.85f), fontSize = 8.sp)
                         }
 
-                        // Hours
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(end = 20.dp)) {
-                            Text(text = two(hours), color = Color(0xFF2FE09B), fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                            Text(text = "Hours", color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
+                            Text(text = two(hours), color = Color(0xFF009B3A), fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "Hours", color = Color.White.copy(alpha = 0.85f), fontSize = 8.sp)
                         }
 
-                        // Minutes
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = two(minutes), color = Color(0xFF2FE09B), fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                            Text(text = "Minutes", color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
+                            Text(text = two(minutes), color = Color(0xFF009B3A), fontSize = 30.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "Minutes", color = Color.White.copy(alpha = 0.85f), fontSize = 8.sp)
                         }
                     }
                 }
             }
         }
 
-        item { Spacer(modifier = Modifier.height(18.dp)) }
+        // slight transition strip to content (keeps your gradient look)
+        item {
+            Spacer(
+                modifier = Modifier
+                    .height(18.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF041811),
+                                Color(0xFF000000)
+                            ),
+                            startY = 0f,
+                            endY = Float.POSITIVE_INFINITY
+                        )
+                    )
+            )
+        }
 
-        // Circuit title
         item {
             Text(
                 text = circuitTitle,
                 color = Color.White,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
+                style = TextStyle(
+                    fontFamily = montserratFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    lineHeight = 18.sp,
+                    letterSpacing = 0.sp
+                ),
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
+
         }
 
-        // Circuit paragraph (white text, with subtle rounded strip around)
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.Black)
-                        .padding(14.dp)
+                        .padding(0.dp)
                 ) {
                     Text(
                         text = circuitParagraph,
-                        color = Color.White.copy(alpha = 0.95f),
-                        fontSize = 16.sp,
-                        lineHeight = 22.sp
+                        color = Color.White,
+                        lineHeight = 22.sp,
+                        style = TextStyle(
+                            fontFamily = montserratFontFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 12.sp,
+                            lineHeight = 18.sp,
+                            letterSpacing = 0.sp
+                        )
                     )
                 }
             }
         }
 
-        // Circuit Facts header
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Circuit Facts",
+                style = TextStyle(
+                    fontFamily = montserratFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    lineHeight = 18.sp,
+                    letterSpacing = 0.sp
+                ),
                 color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
 
-        // Facts paragraphs (no bullets). After each fact add a subtle transparent divider
         items(factParagraphs.size) { idx ->
             val p = factParagraphs[idx]
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
             ) {
                 Text(
                     text = p,
                     color = Color.White.copy(alpha = 0.9f),
-                    fontSize = 16.sp,
+                    style = TextStyle(
+                        fontFamily = montserratFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 12.sp,
+                        lineHeight = 18.sp,
+                        letterSpacing = 0.sp
+                    ),
                     lineHeight = 20.sp
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // subtle transparent divider
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

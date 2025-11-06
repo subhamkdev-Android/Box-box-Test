@@ -5,10 +5,12 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,13 +35,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,25 +51,33 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import com.subhamkumar.boxboxapp.R
 import com.subhamkumar.boxboxapp.data.model.Driver
 import com.subhamkumar.boxboxapp.data.model.Race
 import com.subhamkumar.boxboxapp.data.model.Session
+import com.subhamkumar.boxboxapp.ui.theme.SpaceGrotesk
+import com.subhamkumar.boxboxapp.ui.theme.montserratFontFamily
+import com.subhamkumar.boxboxapp.utils.formatAmPm
 import com.subhamkumar.boxboxapp.utils.formatDateLocal
 import com.subhamkumar.boxboxapp.utils.formatTimeLocal
 import com.subhamkumar.boxboxapp.utils.getNextUpcomingRace
@@ -87,7 +99,7 @@ fun RaceSummaryRow(
     ) {
         RaceSessionCard(
             modifier = Modifier
-                .weight(1.6f)
+                .weight(1f)
                 .height(132.dp),
             session = session,
             onClick = onClickRaceInfo
@@ -105,18 +117,20 @@ fun RaceSummaryRow(
                     .weight(1f),
                 label = "7015.3",
                 unit = "km",
-                imageRes = R.drawable.icon_distance // your left image
+                imageRes = R.drawable.ic_distance_icon,
+                progress = 0.38f,
+                animateProgress = true
             )
 
             LinkCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                iconRes = R.drawable.medium,
+                iconRes = R.drawable.ic_medium,
                 titleTop = "Formula 1",
                 titleBottom = "Education",
                 url = "https://blog.boxbox.club/tagged/beginners-guide",
-                topRightIcon = R.drawable.frame
+                topRightIcon = R.drawable.ic_arrow_right
             )
         }
     }
@@ -127,8 +141,8 @@ fun RaceSummaryRow(
 fun RaceSessionCard(
     modifier: Modifier = Modifier, session: Session, onClick: () -> Unit
 ) {
-    val greenBg = Color(0xFF0D624F)
-    val timeGreen = Color(0xFF2FE09B)
+    val greenBg = Color(0xFF044331)
+    Color(0xFF2FE09B)
     val whiteAlpha = Color.White.copy(alpha = 0.95f)
 
     Card(
@@ -140,38 +154,48 @@ fun RaceSessionCard(
                 .background(greenBg)
                 .padding(14.dp)
         ) {
-            // top-right small track icon
             Icon(
-                painter = painterResource(id = R.drawable.circuit),
-                contentDescription = "Circuit",
+                painter = painterResource(id = R.drawable.ic_circuit),
+                contentDescription = "Circuit Brazil",
                 tint = Color.Unspecified,
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(46.dp)
                     .align(Alignment.TopEnd)
             )
 
             Column(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(end = 36.dp, top = 15.dp) // leave room for the image/icon at right
+                    .padding(top = 15.dp)
             ) {
 
                 Text(
                     text = session.sessionName,
                     color = whiteAlpha,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    style = TextStyle(
+                        fontFamily = SpaceGrotesk,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        lineHeight = 14.sp,
+                        letterSpacing = 0.sp,
+                    ),
+                    modifier = Modifier
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                        .clip(RoundedCornerShape(4.dp))
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Small line with calendar icon + date
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        painter = painterResource(id = R.drawable.vector),
+                        painter = painterResource(id = R.drawable.ic_calender),
                         contentDescription = "date icon",
                         tint = Color.Unspecified,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier
+                            .size(18.dp)
+                            .padding(start = 6.dp)
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -179,91 +203,174 @@ fun RaceSessionCard(
                     Text(
                         text = formatDateLocal(session.startTime),
                         color = whiteAlpha,
-                        fontSize = 13.sp
+                        fontSize = 14.sp,
+                        style = TextStyle(
+                            fontFamily = SpaceGrotesk,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 18.sp,
+                        )
                     )
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                val time = formatTimeLocal(session.startTime)
+                val unitTime = formatAmPm(session.startTime)
 
-                // Big time
-                Text(
-                    text = formatTimeLocal(session.startTime),
-                    color = timeGreen,
-                    fontSize = 42.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = time, style = TextStyle(
+                            fontFamily = SpaceGrotesk,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 36.sp,
+                            lineHeight = 36.sp,
+                            color = Color(0xFF02BB81)
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = unitTime, style = TextStyle(
+                            fontFamily = SpaceGrotesk,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 20.sp,
+                            lineHeight = 20.sp,
+                            color = Color(0xFF02BB81)
+                        )
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun StatCard(
     modifier: Modifier = Modifier,
     label: String = "7015.3",
     unit: String = "km",
-    @DrawableRes imageRes: Int,
-    @DrawableRes fallbackBitmap: Int? = null
+    @DrawableRes imageRes: Int = R.drawable.ic_distance_icon,
+    progress: Float = 0.40f,
+    animateProgress: Boolean = true,
+    fontFamily: FontFamily = SpaceGrotesk
 ) {
-    // tweak this to control how wide the left image pill appears
-    val leftImageWidth = 22.dp
+    val clamped = progress.coerceIn(0f, 1f)
+    val target = if (animateProgress) clamped else clamped
+    val animatedProgress by animateFloatAsState(
+        targetValue = target, animationSpec = tween(
+            durationMillis = 500, easing = FastOutSlowInEasing
+        )
+    )
+
+    val cardRadius = 16.dp
+    val redColor = Color(0xFFF51A1E)
+    val blackPanel = Color(0xFF0B0B0B)
+    val outline = Color(0xFF212121)
 
     Card(
         modifier = modifier
             .height(64.dp)
-            .clip(RoundedCornerShape(0.dp)),
-        shape = RoundedCornerShape(12.dp)
+            .clip(RoundedCornerShape(cardRadius)),
+        shape = RoundedCornerShape(cardRadius),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            val leftPainter: Painter = runCatching { painterForDrawable(imageRes) }.getOrElse {
-                fallbackBitmap?.let { painterResource(id = it) } ?: painterResource(id = imageRes)
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(blackPanel)
+                .padding(1.dp)
+        ) {
+            Box(modifier = Modifier.matchParentSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(animatedProgress)
+                        .clip(RoundedCornerShape(topStart = cardRadius, bottomStart = cardRadius))
+                        .background(
+                            Brush.horizontalGradient(listOf(redColor, redColor.copy(alpha = 0.95f)))
+                        )
+                )
 
-//            Image(
-//                painter = leftPainter,
-//                contentDescription = "stat left image",
-//                modifier = Modifier
-//                    .fillMaxHeight()
-//                    .width(leftImageWidth)
-//                    .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
-//                contentScale = ContentScale.None
-//            )
+                if (animatedProgress in 0.001f..0.999f) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(animatedProgress)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .width(1.dp)
+                                .fillMaxHeight()
+                                .background(outline.copy(alpha = 0.6f))
+                        )
+                    }
+                }
 
-            // Right panel must expand — use weight so it doesn't squeeze the text
-            Box(
-                modifier = Modifier
-                    .background(Color(0xFF0B0B0B))
-                    .height(64.dp)
-                    .padding(start = 14.dp, end = 12.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = label,
-                        color = Color.White,
-                        // slightly reduced so it fits better
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        softWrap = false
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 9.dp, end = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = "stat icon",
+                        modifier = Modifier.size(28.dp),
+                        contentScale = ContentScale.Fit
                     )
 
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                    Text(
-                        text = unit,
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentHeight(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Text(
+                            text = label, style = TextStyle(
+                                fontFamily = fontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 25.sp,
+                                lineHeight = 28.sp,
+                            ), color = Color.White, maxLines = 1
+                        )
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .height(28.dp)
+                                .defaultMinSize(minWidth = 36.dp)
+                                .padding(top = 8.dp)
+                                .clip(RoundedCornerShape(6.dp)),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Text(
+                                text = unit, style = TextStyle(
+                                    fontFamily = fontFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp,
+                                    lineHeight = 28.sp,
+                                    letterSpacing = 0.sp
+                                ), color = Color.White, maxLines = 1, textAlign = TextAlign.Start
+                            )
+                        }
+                    }
                 }
             }
+
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(0.5.dp)
+                    .clip(RoundedCornerShape(cardRadius))
+            ) {}
         }
     }
 }
+
 
 @Composable
 fun LinkCard(
@@ -280,80 +387,77 @@ fun LinkCard(
     Card(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .height(60.dp), // consistent height
+            .height(60.dp),
         shape = RoundedCornerShape(16.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(deepBlue)
-                .clickable {
-                    ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                }
-                .padding(horizontal = 14.dp)
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(deepBlue)
+            .clickable {
+                ctx.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+            }
+
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .align(Alignment.CenterStart),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(start = 14.dp)
+                    .align(Alignment.CenterStart), verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left icon (Formula 1 dots)
+
                 Image(
                     painter = painterForDrawable(iconRes),
                     contentDescription = "Link icon",
                     modifier = Modifier
-                        .size(28.dp)
-                        .padding(end = 10.dp),
+                        .size(32.dp)
+                        .padding(end = 10.dp)
+                        .alpha(1f),
                     contentScale = ContentScale.Fit
                 )
 
-                // Texts
+
+
                 Column(
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.weight(1f)
+                    verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = titleTop,
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = titleTop, color = Color(0xFFFFFFFF), style = TextStyle(
+                            fontFamily = montserratFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp,
+                            letterSpacing = 0.sp,
+                        ), maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
+
                     Text(
-                        text = titleBottom,
-                        color = Color.White,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = titleBottom, color = Color(0xFFFFFFFF), style = TextStyle(
+                            fontFamily = montserratFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            lineHeight = 16.sp,
+                            letterSpacing = 0.sp,
+                        ), maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
-//            // Top-right arrow inside card (smaller, properly positioned)
-//            Box(
-//                modifier = Modifier
-//                    .size(22.dp)
-//                    .align(Alignment.TopEnd)
-//                    .offset(x = (-10).dp, y = 8.dp)
-//                    .clip(CircleShape)
-//                    .background(Color.White),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Image(
-//                    painter = painterForDrawable(topRightIcon),
-//                    contentDescription = "Open link icon",
-//                    modifier = Modifier.size(10.dp),
-//                    contentScale = ContentScale.Fit
-//                )
-//            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .clip(CircleShape)
+                    .padding(8.dp),
+
+                ) {
+                Image(
+                    painter = painterForDrawable(topRightIcon),
+                    contentDescription = "Open link icon",
+                    modifier = Modifier.size(18.dp),
+                )
+            }
         }
     }
 }
-
-
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -368,7 +472,7 @@ fun HomeScreen(navController: NavHostController) {
 
     val pagerState = rememberPagerState(pageCount = { 2 })
 
-    // Auto-slide every 3 seconds
+
     LaunchedEffect(pagerState) {
         while (true) {
             delay(3000)
@@ -377,7 +481,6 @@ fun HomeScreen(navController: NavHostController) {
         }
     }
 
-    // Entire screen background black
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -402,28 +505,43 @@ fun HomeScreen(navController: NavHostController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     item {
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(400.dp)
-                                .padding(0.dp, 0.dp)
-                        ) { page ->
-                            when (page) {
-                                0 -> {
-                                    if (drivers.isNotEmpty()) {
-                                        val topDriver = drivers.first()
-                                        TopDriverCard(
-                                            driver = topDriver, navController = navController
-                                        )
-                                    } else {
-                                        Text("No driver data available", color = Color.White)
+                        Box {
+                            GetProBadge(
+                                modifier = Modifier
+                                    .padding(top = 40.dp)
+                                    .zIndex(1f)
+                            )
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(400.dp)
+                                    .padding(0.dp, 0.dp)
+                            ) { page ->
+                                when (page) {
+                                    0 -> {
+                                        if (drivers.isNotEmpty()) {
+                                            val topDriver = drivers.first()
+                                            TopDriverCard(
+                                                driver = topDriver, navController = navController
+                                            )
+                                        } else {
+                                            Text("No driver data available", color = Color.White)
+                                        }
+                                    }
+
+                                    1 -> {
+                                        TwoImageSlideCard()
                                     }
                                 }
-
-                                1 -> {
-                                    TwoImageSlideCard()
-                                }
+                                //todo
+                                PagerIndicator(
+                                    pagerState = pagerState,
+                                    pageCount = 2,
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .padding(bottom = 0.dp)
+                                )
                             }
                         }
                     }
@@ -463,19 +581,20 @@ fun HomeScreen(navController: NavHostController) {
 }
 
 @Composable
-fun GetProBadge() {
+fun GetProBadge(modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .padding(12.dp)
             .background(
-                color = Color.Black.copy(alpha = 0.4f), shape = RoundedCornerShape(12.dp)
+                color = Color.Transparent, shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = R.drawable.diamond_ig),
-            contentDescription = "Pro Badge", modifier = Modifier.size(18.dp)
+            contentDescription = "Pro Badge",
+            modifier = Modifier.size(18.dp)
         )
 
         Spacer(modifier = Modifier.width(6.dp))
@@ -505,22 +624,25 @@ fun TopDriverCard(
                     )
                 )
             )
-        //  .clickable { navController.navigate("driver_details/${driver.driverId}") }
     ) {
         Text(
             text = driver.firstName.uppercase(),
-            fontSize = 96.sp,
-            color = Color.White.copy(alpha = 0.20f),
-            fontWeight = FontWeight.ExtraBold,
+            style = TextStyle(
+                fontFamily = SpaceGrotesk,
+                fontWeight = FontWeight.Bold,
+                fontSize = 164.sp,
+                lineHeight = 164.sp,
+                letterSpacing = (-12).sp
+            ),
+            color = Color.White.copy(alpha = 0.3f),
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .absoluteOffset(20.dp, 20.dp)
-                .padding(start = 26.dp, top = 16.dp)
+                .width(442.dp)
+                .height(164.dp)
+                .absoluteOffset(x = 20.dp, y = 70.dp)
         )
 
-        GetProBadge()
         Image(
-            painter = painterResource(id = R.drawable.lando),
+            painter = painterResource(id = R.drawable.lando_norris),
             contentDescription = driver.fullName,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -541,16 +663,15 @@ fun TopDriverCard(
                 )
         )
 
-        // Bottom overlay content
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 20.dp, bottom = 22.dp)
         ) {
-            // Position & Wins row
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                    painter = painterResource(id = R.drawable.position_icon),
+                    painter = painterResource(id = R.drawable.ic_pos),
                     contentDescription = "position icon",
                     modifier = Modifier.size(14.dp)
                 )
@@ -558,16 +679,20 @@ fun TopDriverCard(
                 Spacer(modifier = Modifier.width(6.dp))
 
                 Text(
-                    text = "${driver.position} Pos",
-                    color = Color.White,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = "${driver.position} Pos", color = Color(0xFFFFFFFF), style = TextStyle(
+                        fontFamily = SpaceGrotesk,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        lineHeight = 16.sp,
+                        letterSpacing = 0.sp
+                    ), modifier = Modifier, maxLines = 1
                 )
+
 
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Image(
-                    painter = painterResource(id = R.drawable.icons),
+                    painter = painterResource(id = R.drawable.ic_wins),
                     contentDescription = "wins icon",
                     modifier = Modifier.size(14.dp)
                 )
@@ -575,55 +700,63 @@ fun TopDriverCard(
                 Spacer(modifier = Modifier.width(6.dp))
 
                 Text(
-                    text = "${driver.wins} Wins",
-                    color = Color.White,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = "${driver.wins} Wins", color = Color(0xFFFFFFFF), style = TextStyle(
+                        fontFamily = SpaceGrotesk,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        lineHeight = 16.sp,
+                        letterSpacing = 0.sp
+                    ), modifier = Modifier, maxLines = 1
                 )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Points section with gradient text + solid orange PTS box
+
             Row(verticalAlignment = Alignment.Bottom) {
-                // Gradient "points" text
+
                 Text(
                     text = driver.points.toString(),
-                    fontSize = 64.sp,
-                    fontWeight = FontWeight.Light,
-                    letterSpacing = (-1).sp,
-                    style = LocalTextStyle.current.copy(
+                    style = TextStyle(
+                        fontFamily = SpaceGrotesk,
+                        fontWeight = FontWeight.W300,
+                        fontSize = 72.sp,
+                        lineHeight = 70.sp,
+                        letterSpacing = 0.sp,
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFFFFA726), // light orange
-                                Color(0xFFFFFFFF)  // white gradient top
+                                Color(0xFFFFFFFF), Color(0xFFFF5A08)
                             )
                         )
-                    )
+
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(
-                    text = "PTS",
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Medium,
+
+                Box(
                     modifier = Modifier
-                        .offset(y = (-8).dp)
-                        .width(35.dp)
+                        .offset(y = (-20).dp)
+                        .width(37.dp)
                         .height(18.dp)
-                        .background(
-                            color = Color(0xFFFF5A08), // Updated to deep orange-red #FF5A08
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                        .padding(
-                            start = 8.dp,
-                            top = 2.dp,
-                            end = 0.dp,
-                            bottom = 2.dp
-                        )
-                )
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(Color(0xFFFF5A08)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "PTS", color = Color.White, style = TextStyle(
+                            fontFamily = SpaceGrotesk,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp,
+                            lineHeight = 14.sp,
+                            letterSpacing = 0.sp
+                        ), textAlign = TextAlign.Center
+                    )
+                }
+
 
             }
         }
@@ -669,13 +802,13 @@ fun TwoImageSlideCard() {
         ) {
 
             Image(
-                painter = painterResource(id = R.drawable.second_screen_img),
+                painter = painterResource(id = R.drawable.ic_slider_bg),
                 contentDescription = "Top Image",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(270.dp)
-                    .padding(top = 90.dp)
+                    .height(320.dp)
+                    .padding(top = 120.dp)
                     .clip(
                         RoundedCornerShape(
                             topStart = 20.dp, topEnd = 20.dp
@@ -683,20 +816,8 @@ fun TwoImageSlideCard() {
                     )
             )
 
-            Image(
-                painter = painterResource(id = R.drawable.second_screen_img_bt),
-                contentDescription = "Bottom Image",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(bottom = 16.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            bottomStart = 20.dp, bottomEnd = 20.dp
-                        )
-                    )
-            )
+            FollowButton(
+                modifier = Modifier,  label = "Follow Us", onClick = { /* handle click */ })
         }
     }
 }
@@ -706,8 +827,6 @@ fun TwoImageSlideCard() {
 private fun painterForDrawable(@DrawableRes id: Int): Painter {
     return painterResource(id = id)
 }
-
-
 
 @Composable
 fun InstagramCard(imageRes: Int = R.drawable.image_insta) {
@@ -719,23 +838,110 @@ fun InstagramCard(imageRes: Int = R.drawable.image_insta) {
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(16.dp))
             .clickable {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.instagram.com/boxbox_club/"))
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.instagram.com/boxbox_club/")
+                )
                 context.startActivity(intent)
             },
         shape = RoundedCornerShape(16.dp)
     ) {
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = "F1 25 Instagram card",
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            contentScale = ContentScale.FillWidth // scale image to fit width and keep aspect ratio
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = "F1 25 Instagram card",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                contentScale = ContentScale.FillWidth
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_insta),
+                contentDescription = "Instagram logo",
+                modifier = Modifier
+                    .size(28.dp)
+                    .padding(end = 10.dp, bottom = 10.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
     }
 }
 
 
+
+@Composable
+fun PagerIndicator(
+    pagerState: PagerState,
+    pageCount: Int,
+    modifier: Modifier = Modifier,
+    activeColor: Color = Color.White,
+    inactiveColor: Color = Color.White.copy(alpha = 0.35f),
+    activeWidth: Dp = 28.dp,
+    inactiveWidth: Dp = 6.dp,
+    height: Dp = 6.dp,
+    gap: Dp = 8.dp
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(gap),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val current = pagerState.currentPage
+        for (i in 0 until pageCount) {
+            val isActive = i == current
+            val targetWidth = if (isActive) activeWidth else inactiveWidth
+            val animatedWidth by animateDpAsState(targetValue = targetWidth)
+            val animatedColor by animateColorAsState(targetValue = if (isActive) activeColor else inactiveColor)
+
+            Box(
+                modifier = Modifier
+                    .size(width = animatedWidth, height = height)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(animatedColor)
+            )
+        }
+    }
+}
+@Composable
+fun FollowButton(
+    modifier: Modifier = Modifier,
+    label: String = "Follow Us",
+    fontFamily: FontFamily = montserratFontFamily,
+    onClick: () -> Unit = {}
+) {
+    val bgColor = Color(0xFF86FF0E)
+
+    Box(
+        modifier = modifier
+            .width(140.dp)
+            .height(44.dp)
+            .clip(RoundedCornerShape(55.dp))
+            .background(bgColor)
+            .clickable { onClick() }) {
+        Row(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(start = 19.dp, end = 19.dp, top = 13.dp, bottom = 13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+
+            Text(
+                text = label, textAlign = TextAlign.Center, style = TextStyle(
+                    fontFamily = fontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp,
+                    color = Color.Black
+                )
+            )
+        }
+    }
+}
 
 
 
