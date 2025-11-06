@@ -3,6 +3,7 @@ package com.subhamkumar.boxboxapp.ui.home
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.view.Surface
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
@@ -44,11 +45,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -574,7 +579,13 @@ fun HomeScreen(navController: NavHostController) {
                     }
                     item { Spacer(modifier = Modifier.height(20.dp)) }
 
+
+
                 }
+                BottomNavBar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                )
             }
         }
     }
@@ -586,7 +597,7 @@ fun GetProBadge(modifier: Modifier = Modifier) {
         modifier = modifier
             .padding(12.dp)
             .background(
-                color = Color.Transparent, shape = RoundedCornerShape(12.dp)
+                color = Color.White.copy(alpha = 0.12f), shape = RoundedCornerShape(15.dp)
             )
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -794,7 +805,6 @@ fun TwoImageSlideCard() {
             .clip(RoundedCornerShape(0.1.dp))
             .background(Color.Black), contentAlignment = Alignment.Center
     ) {
-        GetProBadge()
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -906,6 +916,103 @@ fun PagerIndicator(
         }
     }
 }
+
+@Composable
+fun BottomNavBar(
+    modifier: Modifier = Modifier,
+    initialSelectedIndex: Int = 0,
+    onFirstIconClick: (() -> Unit)? = null
+) {
+    var selectedIndex by remember { mutableStateOf(initialSelectedIndex) }
+
+    val barBg = Color(0xFF000000)
+    val inactiveIconTint = Color(0xFF5A5A5A)
+    val activeIconTint = Color.White
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(84.dp),
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(barBg),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (selectedIndex == 0) Color.White.copy(alpha = 0.12f) else Color.Transparent
+                        )
+                        .clickable {
+                            selectedIndex = 0
+                            onFirstIconClick?.invoke()
+                        }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(if (selectedIndex == 0) Color.White else Color(0xFF1F1F1F)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_home),
+                            contentDescription = "Home",
+                            tint = if (selectedIndex == 0) Color.Black else Color(0xFF9E9E9E),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_calendar_days),
+                    contentDescription = "Calendar",
+                    tint = inactiveIconTint,
+                    modifier = Modifier.size(28.dp)
+                )
+
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_trophy),
+                    contentDescription = "Trophy",
+                    tint = inactiveIconTint,
+                    modifier = Modifier.size(28.dp)
+                )
+
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_globus),
+                    contentDescription = "Globe",
+                    tint = inactiveIconTint,
+                    modifier = Modifier.size(28.dp)
+                )
+
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_profile),
+                    contentDescription = "Profile",
+                    tint = inactiveIconTint,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun FollowButton(
     modifier: Modifier = Modifier,
