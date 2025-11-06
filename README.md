@@ -69,11 +69,10 @@ The app was designed and implemented as part of a **mobile developer job assignm
 
 ---
 
-## 🧭 Project Structure
+## 🧭 Project Screenshots
 
-![Image 4 2025-11-06 at 21 58 19_f87b6242](https://github.com/user-attachments/assets/ce8db104-6d27-4919-898e-73668380d2ba)
-![Image 3 2025-11-06 at 21 58 02_bdcb01f5](https://github.com/user-attachments/assets/d86cdd03-23a8-412f-881d-53486769c7dd)
-![Image 2 2025-11-06 at 21 58 11_49af7b7e](https://github.com/user-attachments/assets/14f2dd22-9800-40fe-90e2-e9d3e55d9e81)
-![Image 1 2025-11-06 at 21 59 50_7ed53707](https://github.com/user-attachments/assets/143830af-6d9f-4c90-81a0-1ad499cb20fc)
+| | | | |
+|---|---|---|---|
+| ![Image 1](https://github.com/user-attachments/assets/143830af-6d9f-4c90-81a0-1ad499cb20fc) | ![Image 2](https://github.com/user-attachments/assets/14f2dd22-9800-40fe-90e2-e9d3e55d9e81)  | ![Image 3](https://github.com/user-attachments/assets/d86cdd03-23a8-412f-881d-53486769c7dd) | ![Image 4](https://github.com/user-attachments/assets/ce8db104-6d27-4919-898e-73668380d2ba)|
 
 
