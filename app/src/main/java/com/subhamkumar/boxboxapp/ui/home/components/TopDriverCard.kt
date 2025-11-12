@@ -37,7 +37,7 @@ import com.subhamkumar.boxboxapp.ui.theme.SpaceGrotesk
 
 @Composable
 fun TopDriverCard(
-    driver: Driver, navController: NavHostController
+    driver: Driver?
 ) {
     Box(
         modifier = Modifier
@@ -52,25 +52,27 @@ fun TopDriverCard(
                 )
             )
     ) {
-        Text(
-            text = driver.firstName.uppercase(),
-            style = TextStyle(
-                fontFamily = SpaceGrotesk,
-                fontWeight = FontWeight.Bold,
-                fontSize = 164.sp,
-                lineHeight = 164.sp,
-                letterSpacing = (-12).sp
-            ),
-            color = Color.White.copy(alpha = 0.3f),
-            modifier = Modifier
-                .width(442.dp)
-                .height(164.dp)
-                .absoluteOffset(x = 20.dp, y = 70.dp)
-        )
+        driver?.firstName?.uppercase()?.let {
+            Text(
+                text = it,
+                style = TextStyle(
+                    fontFamily = SpaceGrotesk,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 164.sp,
+                    lineHeight = 164.sp,
+                    letterSpacing = (-12).sp
+                ),
+                color = Color.White.copy(alpha = 0.3f),
+                modifier = Modifier
+                    .width(442.dp)
+                    .height(164.dp)
+                    .absoluteOffset(x = 20.dp, y = 70.dp)
+            )
+        }
 
         Image(
             painter = painterResource(id = R.drawable.lando_norris),
-            contentDescription = driver.fullName,
+            contentDescription = driver?.fullName,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -106,7 +108,7 @@ fun TopDriverCard(
                 Spacer(modifier = Modifier.width(6.dp))
 
                 Text(
-                    text = "${driver.position} Pos", color = Color(0xFFFFFFFF), style = TextStyle(
+                    text = "${driver?.position} Pos", color = Color(0xFFFFFFFF), style = TextStyle(
                         fontFamily = SpaceGrotesk,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -127,7 +129,7 @@ fun TopDriverCard(
                 Spacer(modifier = Modifier.width(6.dp))
 
                 Text(
-                    text = "${driver.wins} Wins", color = Color(0xFFFFFFFF), style = TextStyle(
+                    text = "${driver?.wins} Wins", color = Color(0xFFFFFFFF), style = TextStyle(
                         fontFamily = SpaceGrotesk,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -143,7 +145,7 @@ fun TopDriverCard(
             Row(verticalAlignment = Alignment.Bottom) {
 
                 Text(
-                    text = driver.points.toString(),
+                    text = driver?.points.toString(),
                     style = TextStyle(
                         fontFamily = SpaceGrotesk,
                         fontWeight = FontWeight.W300,

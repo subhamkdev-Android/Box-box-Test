@@ -49,6 +49,7 @@ fun HomeScreen(navController: NavHostController) {
     val races by viewModel.races.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val topDriver by viewModel.topDriver.collectAsState()
 
     val pagerState = rememberPagerState(pageCount = { 2 })
 
@@ -109,10 +110,8 @@ fun HomeScreen(navController: NavHostController) {
                                     when (page) {
                                         0 -> {
                                             if (drivers.isNotEmpty()) {
-                                                val topDriver = drivers.first()
                                                 TopDriverCard(
-                                                    driver = topDriver,
-                                                    navController = navController
+                                                    driver = topDriver
                                                 )
                                             } else {
                                                 Text(
@@ -137,7 +136,7 @@ fun HomeScreen(navController: NavHostController) {
                         }
                     }
 
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
                     item {
                         if (races.isNotEmpty()) {
                             val nextRace = getNextUpcomingRace(races)
